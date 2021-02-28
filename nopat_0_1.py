@@ -1,137 +1,175 @@
-"""
-Author: Pessi Raunio
-Description: Tupla tai kuitti peli
-Filename: nopat_0_1.py
-Modules: random
+# -*- coding: utf-8 -*-
+'''Koodi tehty "nopat_0_1.py" mallivastauksen pohjalle.
+    Author Pessi Raunio
+    Filename nopat_1_0.py'''
 
-"""
 import random
-#Luodaan luokka nopat parametreillä potti, panos ja maara
-class Nopat:
-    def __init__(self, potti, panos, maara):
+import tkinter as tk
+from tkinter import messagebox
+
+
+class Nopat(tk.Tk, tk.Label):
+    
+    #Luodaan ohjelma-ikkuna, määritetään Nopan muuttjille attribuutit
+    #Super initillä peritään Nopan yläluokasta "tk.Tk", metodi "master"
+    def __init__(self, maara = 2, potti = 100, panos = 1, master=None) :
+        super().__init__(master)
+        self.title("Tupla-tai-kuitti-peli")
+        self.master = master
+        self.geometry("400x400")
         self.potti = potti
         self.panos = panos
         self.maara = maara
         
-    #Alustetaan potti
+        self.luoLayout()
+        
+    #Asetellaan napit ja tekstikentät ikkunaan sekä määritellään niiden attribuutit.    
+    def luoLayout(self):
+        labelTervetuloa = tk.Label(self, text="Tervetuloa pelaamaan tupla tai kuitti peliä", font="Modern")
+        labelTervetuloa.pack(pady=5)
+        labelPanos = tk.Label(self, text="Aseta panoksesi", font="Modern 15")
+        labelPanos.pack(pady=5)
+        
+        
+        labelAlkuPotti = tk.Label(self, text=f"Aloituspotti {self.potti}", font="Helvetica 10")
+        labelAlkuPotti.pack(pady=5)
+        
+        global entryPanos
+        entryPanos = tk.Entry(self)
+        entryPanos.pack(pady=5)
+        
+        buttonHeita = tk.Button(self, text="Heitä", command=self.tarkistaTulos)
+        buttonHeita.pack(pady=5)
+
+        buttonTalleta = tk.Button(self, text="Lunasta voitot", command=self.lunastaVoitot)
+        buttonTalleta.pack(pady=5)
+    
+
+    def lunastaVoitot(self):
+        if (self.potti > 0):
+            tk.messagebox.showinfo(title="Lunastus", message=f"Lunastit {self.potti}, peli päättyi")
+            exit()
+        else:
+            tk.messagebox.showinfo(title="Lunastus", message=f"Ei lunastettavaa, potti on {self.potti}")
+            raise ValueError
+            
+    #Metodi jolla peli pelataan
+    def tarkistaTulos(self):
+        labelPaattyi = tk.Label(self, text='').pack()
+        self.heita()
+        self.tarkista()
+
+        
     @property
     def potti(self):
         return self.__potti
     
-    #Tarkistetaan potin arvo
     @potti.setter
     def potti(self, potti):
-        if potti <= 0:
-            raise ValueError("potti ei voi olla negatiivinen")
-        else:
-            self.__potti = potti
-            
-    #Alustetaan panos
+
+        self.__potti = potti
+        if self.__potti < 0 : self.__potti = 0
+    
     @property
     def panos(self):
         return self.__panos
     
-    #Tarkistetaan panoksen määärä arvo
     @panos.setter
     def panos(self, panos):
-        for i in range(1):
-            if (panos == 0):
-                print("Minimi panos on 1, panokseksi asetettu 1")
-            else:
-                break
-        while (panos):
-            if int(panos) > int(self.__potti):
-                print("Panos ei voi olla enemmän kuin potti")
-                self.__panos = panos
-                break
-            
-            elif (panos) < 0:
-                print("Minimi panos on 1, panokseksi asetettu 1")
-                self.__panos = 1
-                break
-            else:
-                self.__panos = panos
-                break
         
-    #Alustetaan maara attribuutti
+        if panos >= 1 and panos <= self.potti:
+            self.__panos = panos
+        else :
+            tk.messagebox.showerror(title="Virhe", message="Panoksen oltava 1 tai pienempi kuin potti")
+            raise ValueError
+   
     @property
     def maara(self):
         return self.__maara
-    #Tarkistaan maara 
+    
     @maara.setter
     def maara(self, maara):
+
         if maara < 0:
             maara = 1
         self.__maara = maara
         self.__luku = [0]*self.maara
-            
-            
-            
-    def heita(self):
-         try:
-             for i in range(self.maara):
-                 self.__luku[i] = random.randint(1, 6)
-             print("Noppien silmäluvut ovat", self.__luku[0], "ja", self.__luku[1])
-         except:
-             print("Eimihinkään")
-             
-    def tarkista(self, maara):
-        if maara != 2:
-            raise ValueError("Väärä peli, tämä on kahden nopan tupla-tai-kuitti")
-        else:
-            for i in self.__luku:
-                if self.__luku[0] == self.__luku[1]:
-                    if self.__luku[0] == 6 or self.__luku[0] == 1:
-                        print("Voitit panoksesi kymmenkertaisena.")
-                        self.__potti = int(self.__potti) + int(self.__panos) * 10
-                        print("potti on nyt", int(self.__potti))
-                        break
-                    
-                    elif self.__luku[0] == 2 or self.__luku[0] == 3 or self.__luku[0] == 4 or self.__luku[0] == 5:
-                        self.__potti = int(self.__potti) + (int(self.__panos) * 2)
-                        print("Voitit panoksesi kaksinkertaisena.")
-                        print("potti on nyt", int(self.__potti))
-                        break
-                
-                elif (self.__luku[0] + self.__luku[1] == 6) or self.__luku[0] != self.__luku[1]:
-                        self.__potti = int(self.__potti) - int(self.__panos)
-                        if self.__potti < 0:
-                            self.__potti = 0
-                        print("Hävisit panoksesi, potti on nyt", self.__potti)
-                        break
-                else:
-                    print("ei tuplaa")
-                    self._potti = self.__potti - (2*int(self.__panos))
-                        
-            
-            
-def main():
-    
-    
-    print("Tupla-tai-kuitti peli - alkupotti 100\n")
-    print("Minimipanos 1\n")
-    
-
-    
-    
-    peli = Nopat(100, 1, 2)
         
-    while (peli.potti > 0):
-        while (peli.panos):
-            try:
-                peli.panos = int(input("Aseta panoksesi: "))
-                if (int(peli.panos) > int(peli.potti)):
-                    print("panos:", (peli.panos))
-                    print("potti", (peli.potti))
-                    continue
-                else:
-                    break
-            except ValueError:
-                print("Panos ei voi olla tyhjä")
+    
+    def heita(self) :
+        for i in range(self.maara) :
+            self.__luku[i] = random.randint(1, 6)
                 
-        peli.heita()
-        peli.tarkista(peli.maara)
-    print("\n---Potti kulutettiin, peli on päättynyt---")
+    
+    def tarkista(self):
+        
+        #Asetetaan layouttiin tekstikentät joihin tulostetaan pelin tulos noppien mukaisesti.
+        
+        inputPanos = entryPanos.get()
 
-if __name__ == '__main__':
-    main()
+        text_nopat = f'Noppien luvut: {self.__luku[0]} ja {self.__luku[1]}'
+
+        labelTulos = tk.Label(self, text='', bd=1, relief="sunken")
+        labelTulos.place(x=170, y=250)
+        labelNopat = tk.Label(self, text='', bd=1, relief="sunken")
+        labelNopat.place(x=150, y=280)
+        labelPottiTulos = tk.Label(self, text='', bd=1, relief="sunken")
+        labelPottiTulos.place(x=170, y=310)
+
+        try:
+            self.panos = int(inputPanos)
+        except ValueError:
+            tk.messagebox.showerror(title="Panos puuttuu", message="Aseta panos!")
+            raise ValueError
+            
+        
+        if self.maara != 2 :
+            raise ValueError('Väärä peli, tupla-tai-kuitti on kahden nopan peli')
+        else :
+            if self.__luku[0] == self.__luku[1] :
+                if self.__luku[0] == 1 or self.__luku[0] == 6 :
+                    labelTulos.config(text=f"    Voitit 10 x {self.panos}    ")
+                    labelNopat.config(text=text_nopat)
+                    
+                    coeff = 10
+                else :
+                    labelNopat.config(text=text_nopat)
+                    labelTulos.config(text=f"    Voitit 2 x {self.panos}    ")
+                    
+                    coeff = 2
+            elif sum(self.__luku) == 6 :
+                labelNopat.config(text=text_nopat)
+                labelTulos.config(text=f"    Menetit {self.panos}    ")
+    
+                coeff = -1
+            else :
+                labelNopat.config(text=text_nopat)
+                labelTulos.config(text=f"Menetit 2 x {self.panos}")
+            
+                coeff = -2
+                
+            self.potti += self.panos * coeff
+            
+        if self.potti <= 0:
+            msqbox = tk.messagebox.askyesno(title="Peli päättyi", message="Potti kulutettu, haluatko aloittaa uuden pelin?.")
+            if msqbox == True:
+                restart()
+            else:
+                exit()
+
+        return labelPottiTulos.config(text=f"Potti nyt: {self.potti}")
+        
+
+    
+if __name__ == '__main__' :
+
+    #Aloittaa uuden pelin uudessa ikkunassa
+    def restart():
+        root = Nopat()
+        root.mainloop()
+
+        
+
+    root = Nopat()
+    root.mainloop()
+
